@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CV Fixer — See your CV the way the robots do</title>
+<meta name="description" content="CV Fixer scores your resume against ATS checks and shows exactly what to fix — no fabrication, ever. Free ATS score, AI feedback, improved CV with PDF export, company fit and tailored cover letters." />
+<meta property="og:title" content="CV Fixer — beat the resume robots" />
+<meta property="og:description" content="Score your CV against ATS checks and fix it with AI. No fabrication, ever." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F4F6F5; --ink:#19211E; --muted:#5b6a64; --line:#e2e7e4;
+    --accent:#1F6F63; --accentDeep:#163F39; --soft:#E7F0ED; --softer:#EFF5F2;
+    --good:#1F6F63; --warn:#B5791C; --bad:#C0573E;
+    --card:#ffffff; --shadow:0 1px 2px rgba(22,63,57,.04),0 12px 32px rgba(22,63,57,.07);
+    --display:'Space Grotesk',system-ui,sans-serif;
+    --body:'Inter',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .mono{font-family:var(--mono)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:500}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(140%) blur(10px);background:rgba(244,246,245,.82);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.2px}
+  .brand svg{display:block}
+  .nav-links{display:flex;align-items:center;gap:26px;font-size:14px;color:var(--muted);font-weight:500}
+  .nav-links a:hover{color:var(--ink)}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.3px;
+    background:var(--soft);color:var(--accent);padding:7px 13px;border-radius:999px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media(max-width:680px){.nav-links a:not(.pill){display:none}}
+
+  /* hero */
+  .hero{padding:84px 0 72px;position:relative;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(38px,5.4vw,62px);line-height:1.02;letter-spacing:-1.4px;margin:18px 0 0}
+  h1 .em{color:var(--accent)}
+  .lede{font-size:18px;color:var(--muted);margin:22px 0 30px;max-width:34ch}
+  .cta-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:#fff;font-family:var(--display);
+    font-weight:600;font-size:15px;padding:15px 24px;border-radius:13px;border:none;cursor:default;box-shadow:var(--shadow)}
+  .btn small{font-family:var(--mono);font-weight:400;font-size:11px;opacity:.8}
+  .btn-soft{background:transparent;color:var(--accent);box-shadow:none;border:1px solid var(--line);cursor:pointer}
+  .freenote{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:16px}
+  .freenote b{color:var(--accent)}
+
+  /* hero visual: score / feedback panel (no images) */
+  .stage{position:relative;display:flex;justify-content:center}
+  .hero-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:24px;
+    padding:24px;box-shadow:0 30px 70px rgba(22,63,57,.16),0 6px 16px rgba(22,63,57,.08)}
+  .hc-top{display:flex;align-items:center;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .ring{position:relative;width:86px;height:86px;flex:none}
+  .ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--display);font-weight:700;font-size:26px;color:var(--accentDeep)}
+  .hc-top .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .hc-top .verdict{font-family:var(--display);font-weight:600;font-size:18px;color:var(--ink);margin-top:3px}
+  .hc-top .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .hc-rows{padding:16px 0 4px}
+  .hc-row{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:14.5px;color:var(--ink);border-bottom:1px solid var(--softer)}
+  .hc-row .ck{width:20px;height:20px;border-radius:50%;background:var(--soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+  .hc-row .ck.warn{background:#FBF0DC;color:var(--warn)}
+  .hc-row .pt{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .hc-row .pt.mut{color:var(--warn)}
+  .hc-fix{margin-top:16px;background:var(--soft);border-radius:14px;padding:14px}
+  .hc-fix .fx-lbl{font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.4px;margin-bottom:6px}
+  .hc-fix .fx-body{font-size:13.5px;color:var(--ink);line-height:1.5}
+  .hc-fix b{color:var(--accentDeep)}
+  .floaty{position:absolute;right:-14px;top:24px;background:var(--accentDeep);color:#eafff8;border-radius:14px;
+    padding:11px 14px;box-shadow:var(--shadow);z-index:4;max-width:168px}
+  .floaty .t{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+  .floaty .b{font-family:var(--display);font-size:13px;font-weight:500;line-height:1.35;margin-top:3px}
+
+  @media(max-width:860px){
+    .hero-grid{grid-template-columns:1fr;gap:54px}
+    .lede{max-width:none}
+    .stage{order:-1}
+    .floaty{right:0}
+  }
+
+  /* section scaffolding */
+  section.band{padding:74px 0;border-top:1px solid var(--line)}
+  .sec-head{max-width:60ch;margin-bottom:40px}
+  .sec-head h2{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.4vw,36px);letter-spacing:-.8px;margin:12px 0 0}
+  .sec-head p{color:var(--muted);font-size:16.5px;margin:12px 0 0}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow)}
+  .step .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700}
+  .step h3{font-family:var(--display);font-weight:600;font-size:18px;margin:14px 0 6px;letter-spacing:-.3px}
+  .step p{color:var(--muted);font-size:14.5px;margin:0}
+  @media(max-width:760px){.steps{grid-template-columns:1fr}}
+
+  /* features */
+  .feat{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);position:relative}
+  .card .ic{width:42px;height:42px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .card h3{font-family:var(--display);font-weight:600;font-size:17.5px;margin:16px 0 6px;letter-spacing:-.3px}
+  .card p{color:var(--muted);font-size:14.5px;margin:0}
+  .tag{position:absolute;top:22px;right:22px;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.6px;
+    padding:4px 9px;border-radius:999px}
+  .tag.free{background:var(--soft);color:var(--accent)}
+  .tag.pro{background:#FBF3E2;color:var(--warn)}
+  @media(max-width:760px){.feat{grid-template-columns:1fr}}
+
+  /* before / after */
+  .ba{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:stretch;max-width:880px;margin:0 auto}
+  .ba-col{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow)}
+  .ba-col.before{border-style:dashed;background:transparent}
+  .ba-col.after{border-color:var(--accent)}
+  .ba-tag{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+  .ba-col.before .ba-tag{color:var(--bad)}
+  .ba-col.after .ba-tag{color:var(--accent)}
+  .ba-col p{font-size:16px;color:var(--ink);margin:0;line-height:1.55}
+  .ba-col.before p{color:var(--muted)}
+  .ba-col.after b{color:var(--accentDeep)}
+  .ba-arrow{display:flex;align-items:center;color:var(--accent);font-size:24px;font-family:var(--display)}
+  @media(max-width:680px){.ba{grid-template-columns:1fr}.ba-arrow{transform:rotate(90deg);justify-content:center}}
+
+  /* trust */
+  .trust{background:var(--accentDeep);color:#dff3ec;border-radius:24px;padding:46px 40px;text-align:center}
+  .trust h2{font-family:var(--display);font-weight:600;font-size:clamp(24px,3.2vw,32px);letter-spacing:-.6px;margin:0 0 10px;color:#fff}
+  .trust p{color:#bfe0d5;font-size:16px;margin:0 auto;max-width:54ch}
+  .trust .marks{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-top:26px;font-family:var(--mono);font-size:13px;color:#9eccbd}
+  .trust .marks span{display:inline-flex;align-items:center;gap:8px}
+
+  /* legal */
+  .legal{max-width:740px;margin:0 auto}
+  .legal h2{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.6px;margin:0 0 4px}
+  .legal h3{font-family:var(--display);font-weight:600;font-size:18px;color:var(--accent);margin:30px 0 8px}
+  .legal p,.legal li{color:#2a332f;font-size:15.5px}
+  .legal em{color:var(--muted);font-style:normal;font-family:var(--mono);font-size:13px}
+  .legal ul{padding-left:20px}
+  .legal li{margin:5px 0}
+  .legal strong{color:var(--ink)}
+  .legal hr{border:none;border-top:1px solid var(--line);margin:40px 0}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:13.5px}
+  .foot-in{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .foot-links{display:flex;gap:20px;font-family:var(--mono);font-size:12.5px}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.pill .dot{animation:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <circle cx="13" cy="13" r="11" stroke="#1F6F63" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="52 18" transform="rotate(-90 13 13)"/>
+        <path d="M8.4 13.3l3 3 6.1-6.6" stroke="#163F39" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      CV Fixer
+    </div>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#terms">Terms</a>
+      <a class="pill" href="#"><span class="dot"></span>Coming soon</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal in">
+      <span class="eyebrow">ATS résumé scorer</span>
+      <h1>See your CV the way the <span class="em">robots</span> do.</h1>
+      <p class="lede">Most resumes are filtered by software before a human ever reads them. CV Fixer scores yours against ATS checks, then shows exactly what to fix — grounded only in your CV, with no fabrication.</p>
+      <div class="cta-row">
+        <span class="btn">Coming soon to the App Store <small>iOS</small></span>
+        <a class="btn btn-soft" href="#how">See how it works</a>
+      </div>
+      <p class="freenote">Your ATS score is <b>free</b>. Pro unlocks every fix, AI feedback, an improved CV &amp; more.</p>
+    </div>
+
+    <div class="stage reveal in">
+      <div class="hero-card">
+        <div class="hc-top">
+          <div class="ring">
+            <svg width="86" height="86">
+              <circle cx="43" cy="43" r="36" stroke="#E7F0ED" stroke-width="8" fill="none"/>
+              <circle id="ringArc" cx="43" cy="43" r="36" stroke="#1F6F63" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="226.2" transform="rotate(-90 43 43)"/>
+            </svg>
+            <div class="num" id="ringNum">0</div>
+          </div>
+          <div>
+            <div class="lbl">ATS score · live</div>
+            <div class="verdict">ATS-friendly</div>
+            <div class="sub mono">Format 100 · Keywords 88</div>
+          </div>
+        </div>
+        <div class="hc-rows">
+          <div class="hc-row"><span class="ck">✓</span>Readable text<span class="pt">20/20</span></div>
+          <div class="hc-row"><span class="ck">✓</span>Single-column layout<span class="pt">12/12</span></div>
+          <div class="hc-row"><span class="ck warn">!</span>Quantified impact<span class="pt mut">4/8</span></div>
+        </div>
+        <div class="hc-fix">
+          <div class="fx-lbl mono">✏️ Stronger version</div>
+          <div class="fx-body">Created <b>[2]</b> launch games with Rollic, including Money Honey! and Tailor Master.</div>
+        </div>
+      </div>
+      <div class="floaty">
+        <div class="t">No fabrication</div>
+        <div class="b">Rewrites stay true to what you actually did.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="band" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Three steps</span>
+      <h2>From upload to interview-ready.</h2>
+      <p>No account hoops to see your score. Upload, read your number, then fix what's holding it back.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="n">01</div><h3>Upload your CV</h3><p>PDF, DOCX or DOC. Parsed the same way an applicant-tracking system would read it.</p></div>
+      <div class="step reveal"><div class="n">02</div><h3>Get your ATS score — free</h3><p>A real score out of 100 with a clear breakdown of what passed and what didn't.</p></div>
+      <div class="step reveal"><div class="n">03</div><h3>Fix it with AI</h3><p>Line-by-line rewrites, a stronger CV, job keyword match and a tailored cover letter.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">What's inside</span>
+      <h2>Everything to get past the filter.</h2>
+      <p>The score is free so you always know where you stand. Pro is for actually fixing it.</p>
+    </div>
+    <div class="feat">
+      <div class="card reveal"><span class="tag free">FREE</span><div class="ic">🎯</div><h3>ATS score &amp; boost potential</h3><p>Your real score, plus how many points you could still gain.</p></div>
+      <div class="card reveal"><span class="tag pro">PRO</span><div class="ic">⚡</div><h3>Every quick win</h3><p>The biggest, easiest score boosts — with exactly how to apply each one.</p></div>
+      <div class="card reveal"><span class="tag pro">PRO</span><div class="ic">🔍</div><h3>Job keyword match</h3><p>Paste any posting to see your match and the exact terms to add.</p></div>
+      <div class="card reveal"><span class="tag pro">PRO</span><div class="ic">✨</div><h3>AI feedback — no fabrication</h3><p>Specific, line-by-line fixes grounded only in your CV. It never invents experience.</p></div>
+      <div class="card reveal"><span class="tag pro">PRO</span><div class="ic">📄</div><h3>One-tap improved CV</h3><p>Apply every fix into a stronger, ATS-ready CV and export it as a PDF.</p></div>
+      <div class="card reveal"><span class="tag pro">PRO</span><div class="ic">🏢</div><h3>Company fit · 5 big tech</h3><p>Score your CV against Meta, Google, Amazon, Apple and Microsoft.</p></div>
+      <div class="card reveal"><span class="tag pro">PRO</span><div class="ic">✍️</div><h3>Tailored cover letter</h3><p>Written for the posting, using only the facts already in your CV.</p></div>
+      <div class="card reveal"><span class="tag free">FREE</span><div class="ic">🔒</div><h3>Private by default</h3><p>Your CV is never shared publicly, never sold, and never used to train AI.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head reveal" style="text-align:center;margin-left:auto;margin-right:auto">
+      <span class="eyebrow">Before · after</span>
+      <h2>It strengthens — it never invents.</h2>
+      <p style="margin-left:auto;margin-right:auto">Same facts, sharper language. Placeholders like [X%] are left for you to fill with real numbers.</p>
+    </div>
+    <div class="ba reveal">
+      <div class="ba-col before">
+        <div class="ba-tag mono">Before</div>
+        <p>“Creating hybrid-casual games for various publishers.”</p>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-col after">
+        <div class="ba-tag mono">After</div>
+        <p>“Shipped <b>[N]</b> hybrid-casual titles for publishers including <b>[name]</b>, driving <b>[X%]</b> install growth.”</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="trust reveal">
+      <h2>No fabrication. No exceptions.</h2>
+      <p>CV Fixer strengthens how your real experience reads — it never invents jobs, metrics or skills you don't have. Your CV stays yours.</p>
+      <div class="marks">
+        <span>🔒 Never shared publicly</span>
+        <span>🚫 Never sold</span>
+        <span>🤖 Never trains AI models</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRIVACY ===================== -->
+<section class="band" id="privacy">
+  <div class="wrap legal reveal">
+    <span class="eyebrow">Legal</span>
+    <h2>Privacy Policy</h2>
+    <em>Last updated: June 2026</em>
+    <p>CV Fixer ("the app", "we", "us") helps you score and improve your CV. This policy explains what we collect, how we use it, and your choices. By using the app you agree to this policy.</p>
+
+    <h3>What we collect</h3>
+    <ul>
+      <li><strong>Account data</strong> — your email address, handled by our authentication provider (Supabase) when you sign in.</li>
+      <li><strong>Your CV</strong> — the file you upload and the text extracted from it, used to produce your ATS score, AI feedback, company-fit score, improved CV and cover letter.</li>
+      <li><strong>Job descriptions</strong> — any job posting text you paste to check keyword match.</li>
+      <li><strong>Subscription status</strong> — whether you have an active Pro subscription, managed through the app store and our billing provider (RevenueCat).</li>
+    </ul>
+
+    <h3>How your CV is processed</h3>
+    <p>To generate AI feedback, an improved CV and cover letters, the text of your CV and any job description you paste are sent to our AI provider, <strong>OpenAI</strong>, which processes them to return the result. Your CV is <strong>not</strong> used to train AI models, and it is never published or sold.</p>
+
+    <h3>Where data is stored</h3>
+    <p>Account and subscription data are stored with our backend providers (Supabase). CV content is processed to create your results; we retain only what is needed to provide the service.</p>
+
+    <h3>What we never do</h3>
+    <ul>
+      <li>We never sell your personal data or your CV.</li>
+      <li>We never share your CV publicly.</li>
+      <li>We never show third-party advertising in the app.</li>
+    </ul>
+
+    <h3>Your choices and rights</h3>
+    <p>You can sign out at any time from <strong>Settings</strong>. To request access to, or deletion of, your account and associated data, contact us at the email below. If you are in Türkiye, you have rights under KVKK (Law No. 6698); if you are in the EU/UK, you have rights under the GDPR.</p>
+
+    <h3>Children</h3>
+    <p>The app is not directed to children under 13 (or the minimum age in your country), and we do not knowingly collect their data.</p>
+
+    <h3>Changes</h3>
+    <p>We may update this policy. Material changes will be reflected by the "last updated" date above.</p>
+
+    <h3>Contact</h3>
+    <p><strong>furkancelaledikli@gmail.com</strong></p>
+
+    <hr/>
+
+    <!-- ===================== TERMS ===================== -->
+    <h2 id="terms">Terms of Use</h2>
+    <em>Last updated: June 2026</em>
+    <p>By using CV Fixer you agree to these terms.</p>
+
+    <h3>The service</h3>
+    <p>CV Fixer analyses your CV to provide an ATS score and AI-assisted suggestions. Results are guidance, not a guarantee of any interview, job, or outcome.</p>
+
+    <h3>Subscriptions</h3>
+    <p>Pro features require a subscription billed through your App Store account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel anytime in your App Store account settings. A free trial, where offered, converts to a paid subscription unless cancelled before it ends.</p>
+
+    <h3>Acceptable use</h3>
+    <p>Upload only CV content you have the right to use. Don't misuse the service or attempt to disrupt it.</p>
+
+    <h3>Disclaimer</h3>
+    <p>The app is provided "as is", without warranties of any kind. To the maximum extent permitted by law, we are not liable for any indirect or consequential damages arising from your use of the app.</p>
+
+    <h3>Changes</h3>
+    <p>We may update these terms; continued use after changes means you accept them.</p>
+
+    <h3>Contact</h3>
+    <p><strong>furkancelaledikli@gmail.com</strong></p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>© 2026 CV Fixer</div>
+    <div class="foot-links">
+      <a href="#privacy">Privacy</a>
+      <a href="#terms">Terms</a>
+      <a href="mailto:furkancelaledikli@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ATS score ring animation (hero signature)
+  (function(){
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var target = 92, circ = 226.2, num = document.getElementById('ringNum'), arc = document.getElementById('ringArc');
+    if(reduce){ num.textContent = target; arc.style.strokeDashoffset = circ*(1-target/100); return; }
+    var started = false;
+    function run(){
+      if(started) return; started = true;
+      var t0 = null, dur = 1300;
+      function step(ts){
+        if(!t0) t0 = ts;
+        var p = Math.min((ts-t0)/dur, 1);
+        var e = 1-Math.pow(1-p,3);
+        var v = Math.round(target*e);
+        num.textContent = v;
+        arc.style.strokeDashoffset = circ*(1-(target*e)/100);
+        if(p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    var card = document.querySelector('.scorecard');
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting)run();});},{threshold:.4}).observe(card);
+    } else { run(); }
+  })();
+
+  // Scroll reveal
+  (function(){
+    var els = document.querySelectorAll('.reveal:not(.in)');
+    if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+    },{threshold:.12});
+    els.forEach(function(e){io.observe(e);});
+  })();
+</script>
+</body>
+</html>
