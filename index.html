@@ -298,7 +298,7 @@
 
 <!-- ===================== PRIVACY ===================== -->
 <section class="band" id="privacy">
-  <div class="wrap legal reveal">
+  <div class="wrap legal">
     <span class="eyebrow">Legal</span>
     <h2>Privacy Policy</h2>
     <em>Last updated: June 2026</em>
@@ -410,6 +410,8 @@
       es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
     },{threshold:.12});
     els.forEach(function(e){io.observe(e);});
+    // Güvenlik: 2.5sn sonra görünmeyen kalan olursa zorla göster
+    setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(e){e.classList.add('in');});},2500);
   })();
 </script>
 </body>
